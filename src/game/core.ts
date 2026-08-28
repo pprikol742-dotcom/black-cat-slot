@@ -423,26 +423,48 @@ export function purchasedFreeSpins(): number {
 }
 
 // ─────────────────────────────────────────────────────────────
-// ПОДАРОК НОВИЧКУ
+// ПОДАРКИ НОВИЧКУ
 // ─────────────────────────────────────────────────────────────
 
-/**
- * На этом спине новичок один раз получает полное поле чёрных котов.
- * Это не случайность, а подарок — игра так и говорит игроку прямым
- * текстом, чтобы у него не складывалось ложного впечатления
- * о щедрости математики. Дальше всё честно и навсегда.
- */
-export const GIFT_SPIN = 37;
+export type GiftKind = 'blackCats' | 'scatterCats';
 
-/** Поле из одних чёрных котов: все 20 линий по пять символов. */
-export function giftGrid(): Grid {
-  return Array.from({ length: REEL_COUNT }, () =>
-    Array.from({ length: ROW_COUNT }, () => ({
-      symbol: 'black_cat' as SymbolId,
-      multiplier: 1,
-      sticky: false,
-    })),
-  );
+/**
+ * Заранее заданные поля, которые новичок получает один раз каждое.
+ * Это не случайность, и игра говорит об этом прямым текстом: иначе у
+ * игрока сложится ложное представление о щедрости математики.
+ * После последнего подарка барабаны честны навсегда.
+ *
+ * Считаются только обычные спины, бесплатные в счёт не идут.
+ */
+export const GIFT_SCHEDULE: readonly { spin: number; kind: GiftKind }[] = [
+  { spin: 37, kind: 'blackCats' },
+  { spin: 44, kind: 'scatterCats' },
+] as const;
+
+export function giftAt(spinNo: number): GiftKind | null {
+  return GIFT_SCHEDULE.find((g) => g.spin === spinNo)?.kind ?? null;
+}
+
+function cell(symbol: SymbolId, multiplier = 1): Cell {
+  return { symbol, multiplier, sticky: false };
+}
+
+/** Поле подарка. */
+export function giftGrid(kind: GiftKind): Grid {
+  if (kind === 'blackCats') {
+    // Одни чёрные коты: все 20 линий по пять символов
+    return Array.from({ length: REEL_COUNT }, () =>
+      Array.from({ length: ROW_COUNT }, () => cell('black_cat')),
+    );
+  }
+
+  // Белые кошечки во всю среднюю линию, самоцветы сверху и снизу.
+  // Скаттеров десять — это сразу и выплата, и максимальные фриспины.
+  return Array.from({ length: REEL_COUNT }, () => [
+    cell('scatter'),
+    cell('white_cat'),
+    cell('scatter'),
+  ]);
 }
 
 // ─────────────────────────────────────────────────────────────

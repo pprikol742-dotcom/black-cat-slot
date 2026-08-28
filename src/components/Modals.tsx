@@ -163,17 +163,43 @@ function FreeSpinsEnd({ close }: { close: () => void }) {
 }
 
 function Gift({ close }: { close: () => void }) {
+  const kind = useGame((s) => s.giftKind);
   const win = useGame((s) => s.lastWin);
+  const freeLeft = useGame((s) => s.freeSpinsLeft);
+  const freeTotal = useGame((s) => s.freeSpinsTotal);
+
+  const scatterGift = kind === 'scatterCats';
+
+  const next = () => {
+    sfx.click();
+    useGame.setState({ giftKind: null });
+    // Подарок с самоцветами продолжается серией бесплатных спинов
+    if (freeLeft > 0) useGame.setState({ modal: 'freeSpinsIntro' });
+    else close();
+  };
+
   return (
     <Modal>
-      <img className="fs-banner gift-cat" src={asset("symbols/black_cat.png")} alt="" />
-      <h2>Чёрный кот откопал сундук!</h2>
+      <img
+        className="fs-banner gift-cat"
+        src={asset(scatterGift ? 'symbols/white_cat.png' : 'symbols/black_cat.png')}
+        alt=""
+      />
+      <h2>
+        {scatterGift ? 'Белая кошечка созвала самоцветы!' : 'Чёрный кот откопал сундук!'}
+      </h2>
       <p className="muted">
-        Подарок новичку: целое поле чёрных котов. Такое поле выпадает крайне редко —
-        дальше барабаны крутятся честно, без поблажек.
+        {scatterGift
+          ? `Ещё один подарок новичку: целая линия кошечек и самоцветы сверху и снизу. Это сразу и выплата, и ${freeTotal} бесплатных спинов.`
+          : 'Подарок новичку: целое поле чёрных котов. Такое поле выпадает крайне редко.'}
+      </p>
+      <p className="muted small">
+        Подарки на этом заканчиваются — дальше барабаны крутятся честно, без поблажек.
       </p>
       <div className="big-win">+{win.toLocaleString('ru-RU')} <Coin size={26} /></div>
-      <button className="btn" onClick={() => { sfx.click(); close(); }}>Забрать</button>
+      <button className="btn" onClick={next}>
+        {freeLeft > 0 ? 'К бесплатным спинам' : 'Забрать'}
+      </button>
     </Modal>
   );
 }

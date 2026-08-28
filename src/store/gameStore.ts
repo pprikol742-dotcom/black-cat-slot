@@ -16,7 +16,8 @@ import {
   anticipationFrom,
   evaluateGrid,
   giftGrid,
-  GIFT_SPIN,
+  giftAt,
+  type GiftKind,
   type Grid,
   type LineWin,
   type WinTier,
@@ -42,7 +43,8 @@ interface SavedState {
   soundOn: boolean;
   lastTopUp: number;
   spinCount: number;
-  giftDone: boolean;
+  /** Какие подарки уже выданы — каждый достаётся ровно один раз. */
+  giftsDone: GiftKind[];
 }
 
 export type Screen = 'menu' | 'game';
@@ -60,8 +62,8 @@ interface GameState extends SavedState {
   spinKey: number;
   /** С какого барабана тянуть время. -1 — обычный спин. */
   anticipation: number;
-  /** Показать заставку подарка после текущего спина. */
-  giftPending: boolean;
+  /** Какой подарок объяснять в окне после спина. */
+  giftKind: GiftKind | null;
   lineWins: LineWin[];
   lastWin: number;
   tier: WinTier;
@@ -109,7 +111,7 @@ function persist(s: GameState) {
     soundOn: s.soundOn,
     lastTopUp: s.lastTopUp,
     spinCount: s.spinCount,
-    giftDone: s.giftDone,
+    giftsDone: s.giftsDone,
   };
   void platform.save('state', data);
 }
@@ -127,13 +129,13 @@ export const useGame = create<GameState>((set, get) => ({
   soundOn: true,
   lastTopUp: 0,
   spinCount: 0,
-  giftDone: false,
+  giftsDone: [],
 
   grid: spinGrid(BASE_REELS),
   spinning: false,
   spinKey: 0,
   anticipation: -1,
-  giftPending: false,
+  giftKind: null,
   lineWins: [],
   lastWin: 0,
   tier: 'none',
@@ -162,7 +164,9 @@ export const useGame = create<GameState>((set, get) => ({
         soundOn: saved.soundOn ?? true,
         lastTopUp: saved.lastTopUp ?? 0,
         spinCount: saved.spinCount ?? 0,
-        giftDone: saved.giftDone ?? false,
+        // У старых сохранений был один флаг вместо списка
+        giftsDone: saved.giftsDone
+          ?? ((saved as { giftDone?: boolean }).giftDone ? ['blackCats' as GiftKind] : []),
       });
     }
     set({ ready: true });
@@ -274,11 +278,12 @@ export const useGame = create<GameState>((set, get) => ({
       : new Map<string, number>();
 
     const spinNo = s.inFreeSpins ? s.spinCount : s.spinCount + 1;
-    const isGift = !s.inFreeSpins && !s.giftDone && spinNo === GIFT_SPIN;
+    const pendingGift = s.inFreeSpins ? null : giftAt(spinNo);
+    const gift = pendingGift && !s.giftsDone.includes(pendingGift) ? pendingGift : null;
 
     let result;
-    if (isGift) {
-      const grid = giftGrid();
+    if (gift) {
+      const grid = giftGrid(gift);
       result = { grid, ...evaluateGrid(grid, betPerLine) };
     } else {
       result = s.inFreeSpins ? coreFreeSpin(betPerLine, sticky) : coreSpin(betPerLine);
@@ -293,7 +298,7 @@ export const useGame = create<GameState>((set, get) => ({
       spinKey: s.spinKey + 1,
       grid: result.grid,
       anticipation,
-      giftPending: isGift,
+      giftKind: gift,
       spinCount: spinNo,
       lineWins: [],
       lastWin: 0,
@@ -335,8 +340,8 @@ export const useGame = create<GameState>((set, get) => ({
       set({ freeSpinsWin: get().freeSpinsWin + result.totalWin });
     }
 
-    if (isGift) {
-      set({ giftDone: true });
+    if (gift) {
+      set({ giftsDone: [...get().giftsDone, gift] });
     }
 
     persist(get());
@@ -346,12 +351,23 @@ export const useGame = create<GameState>((set, get) => ({
       void cycleHighlight(set, get, result.lineWins.length);
     }
 
-    if (isGift) {
+    if (gift) {
       sfx.gift();
+      // Подарок с самоцветами открывает ещё и бонус — готовим серию,
+      // запустится она после окна с объяснением
+      if (result.freeSpinsAwarded > 0) {
+        stickyRef.current = collectStickyWilds(result.grid, new Map());
+        duckMusic(true);
+        set({
+          freeSpinsLeft: result.freeSpinsAwarded,
+          freeSpinsTotal: result.freeSpinsAwarded,
+          freeSpinsWin: 0,
+        });
+      }
       // Сначала отыгрывает заставка крупного выигрыша, и только потом
       // игра честно объясняет, что это был подарок, а не везение
       await wait(3800);
-      set({ modal: 'gift', giftPending: false });
+      set({ modal: 'gift' });
       return;
     }
 
