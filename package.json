@@ -1,0 +1,33 @@
+{
+  "name": "black-cat-slot",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "build:vk": "cross-env VITE_PLATFORM=vk vite build --outDir dist-vk",
+    "preview": "vite preview",
+    "sync": "npm run build && npx cap sync android",
+    "deploy": "cross-env VITE_PLATFORM=vk vk-miniapps-deploy"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/core": "^6.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zustand": "^5.0.2",
+    "@vkontakte/vk-bridge": "^2.15.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "cross-env": "^7.0.3",
+    "typescript": "^5.6.3",
+    "vite": "5.4.11",
+    "@vkontakte/vk-miniapps-deploy": "^0.1.4"
+  },
+  "homepage": "./"
+}

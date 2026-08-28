@@ -1,0 +1,10 @@
+node_modules
+dist
+dist-vk
+android/app/build
+android/build
+android/.gradle
+keystore.properties
+*.jks
+*.keystore
+.DS_Store
