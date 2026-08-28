@@ -31,24 +31,24 @@ export interface SymbolMeta {
   title: string;
   /** Выплаты за 3, 4, 5 в линию. Множитель ставки на линию. */
   pays: { 3: number; 4: number; 5: number };
-  /** Путь к спрайту относительно /public */
+  /** Имя файла в public/symbols. Полный путь собирает asset(). */
   art: string;
 }
 
 export const SYMBOLS: Record<SymbolId, SymbolMeta> = {
-  black_cat:  { id: 'black_cat',  title: 'Чёрный кот',       pays: { 3: 28, 4: 100, 5:  330 }, art: '/symbols/black_cat.png' },
-  white_cat:  { id: 'white_cat',  title: 'Белая кошечка',    pays: { 3: 22, 4:  80, 5:  265 }, art: '/symbols/white_cat.png' },
-  ginger_cat: { id: 'ginger_cat', title: 'Рыжий кот',        pays: { 3: 18, 4:  62, 5:  210 }, art: '/symbols/ginger_cat.png' },
-  kitten:     { id: 'kitten',     title: 'Котёнок',          pays: { 3: 14, 4:  46, 5:  165 }, art: '/symbols/kitten.png' },
-  fish:       { id: 'fish',       title: 'Рыбка',            pays: { 3:   9, 4:  30, 5:   100 }, art: '/symbols/fish.png' },
-  mouse:      { id: 'mouse',      title: 'Мышка',            pays: { 3:   8, 4:  24, 5:    78 }, art: '/symbols/mouse.png' },
-  A:          { id: 'A',          title: 'Туз',              pays: { 3:   7, 4:  19, 5:    55 }, art: '/symbols/a.png' },
-  K:          { id: 'K',          title: 'Король',           pays: { 3:   7, 4:  19, 5:    55 }, art: '/symbols/k.png' },
-  Q:          { id: 'Q',          title: 'Дама',             pays: { 3:   6, 4:  14, 5:    42 }, art: '/symbols/q.png' },
-  J:          { id: 'J',          title: 'Валет',            pays: { 3:   6, 4:  14, 5:    42 }, art: '/symbols/j.png' },
-  '10':       { id: '10',         title: 'Десятка',          pays: { 3:   4, 4:  12, 5:    33 }, art: '/symbols/10.png' },
-  wild:       { id: 'wild',       title: 'Корзинка (вайлд)', pays: { 3:  0, 4:  0, 5:   0 }, art: '/symbols/wild.png' },
-  scatter:    { id: 'scatter',    title: 'Самоцвет',         pays: { 3:   2, 4:  11, 5:    55 }, art: '/symbols/scatter.png' },
+  black_cat:  { id: 'black_cat',  title: 'Чёрный кот',       pays: { 3: 28, 4: 100, 5:  330 }, art: 'symbols/black_cat.png' },
+  white_cat:  { id: 'white_cat',  title: 'Белая кошечка',    pays: { 3: 22, 4:  80, 5:  265 }, art: 'symbols/white_cat.png' },
+  ginger_cat: { id: 'ginger_cat', title: 'Рыжий кот',        pays: { 3: 18, 4:  62, 5:  210 }, art: 'symbols/ginger_cat.png' },
+  kitten:     { id: 'kitten',     title: 'Котёнок',          pays: { 3: 14, 4:  46, 5:  165 }, art: 'symbols/kitten.png' },
+  fish:       { id: 'fish',       title: 'Рыбка',            pays: { 3:   9, 4:  30, 5:   100 }, art: 'symbols/fish.png' },
+  mouse:      { id: 'mouse',      title: 'Мышка',            pays: { 3:   8, 4:  24, 5:    78 }, art: 'symbols/mouse.png' },
+  A:          { id: 'A',          title: 'Туз',              pays: { 3:   7, 4:  19, 5:    55 }, art: 'symbols/a.png' },
+  K:          { id: 'K',          title: 'Король',           pays: { 3:   7, 4:  19, 5:    55 }, art: 'symbols/k.png' },
+  Q:          { id: 'Q',          title: 'Дама',             pays: { 3:   6, 4:  14, 5:    42 }, art: 'symbols/q.png' },
+  J:          { id: 'J',          title: 'Валет',            pays: { 3:   6, 4:  14, 5:    42 }, art: 'symbols/j.png' },
+  '10':       { id: '10',         title: 'Десятка',          pays: { 3:   4, 4:  12, 5:    33 }, art: 'symbols/10.png' },
+  wild:       { id: 'wild',       title: 'Корзинка (вайлд)', pays: { 3:  0, 4:  0, 5:   0 }, art: 'symbols/wild.png' },
+  scatter:    { id: 'scatter',    title: 'Самоцвет',         pays: { 3:   2, 4:  11, 5:    55 }, art: 'symbols/scatter.png' },
 };
 
 /** Порядок вывода в таблице выплат — от старших к младшим. */

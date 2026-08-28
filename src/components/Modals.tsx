@@ -2,6 +2,7 @@ import { useGame, DAILY_REWARDS, beginFreeSpins } from '../store/gameStore';
 import { SYMBOLS, PAYTABLE_ORDER } from '../game/core';
 import { sfx } from '../audio/audio';
 import { GiftIcon, PlayIcon, Coin } from './Icon';
+import { asset } from '../assets';
 
 function Modal({ children, onClose }: { children: React.ReactNode; onClose?: () => void }) {
   return (
@@ -26,7 +27,7 @@ function Rules({ close }: { close: () => void }) {
       <div className="paytable">
         {PAYTABLE_ORDER.map((id) => (
           <div className="pay-row" key={id}>
-            <img src={SYMBOLS[id].art} alt="" />
+            <img src={asset(SYMBOLS[id].art)} alt="" />
             <span className="pay-name">{SYMBOLS[id].title}</span>
             <span className="pay-vals">
               5→{SYMBOLS[id].pays[5]}&nbsp;&nbsp;4→{SYMBOLS[id].pays[4]}&nbsp;&nbsp;3→{SYMBOLS[id].pays[3]}
@@ -36,8 +37,8 @@ function Rules({ close }: { close: () => void }) {
       </div>
 
       <ul className="rules-list">
-        <li><img src={SYMBOLS.wild.art} alt="" /> <b>Вайлд (корзинка)</b> — на барабанах 2–3–4, заменяет всё кроме самоцвета, с множителем ×2 или ×3.</li>
-        <li><img src={SYMBOLS.scatter.art} alt="" /> <b>Скаттер (самоцвет)</b> — 3 и больше в любом месте запускают бесплатные спины, где вайлды становятся липкими.</li>
+        <li><img src={asset(SYMBOLS.wild.art)} alt="" /> <b>Вайлд (корзинка)</b> — на барабанах 2–3–4, заменяет всё кроме самоцвета, с множителем ×2 или ×3.</li>
+        <li><img src={asset(SYMBOLS.scatter.art)} alt="" /> <b>Скаттер (самоцвет)</b> — 3 и больше в любом месте запускают бесплатные спины, где вайлды становятся липкими.</li>
         <li><GiftIcon size={16} /> <b>Покупка бонуса</b> — кнопка под ставкой даёт бесплатные спины сразу, цена 50 ставок.</li>
       </ul>
 
@@ -141,7 +142,7 @@ function FreeSpinsIntro() {
   const total = useGame((s) => s.freeSpinsTotal);
   return (
     <Modal>
-      <img className="fs-banner" src="/symbols/freespins.png" alt="" />
+      <img className="fs-banner" src={asset("symbols/freespins.png")} alt="" />
       <h2>{total} бесплатных спинов!</h2>
       <p className="muted">Вайлды-корзинки становятся липкими. Нажмите, чтобы начать</p>
       <button className="btn" onClick={() => { sfx.click(); beginFreeSpins(); }}>Начать</button>
@@ -165,7 +166,7 @@ function Gift({ close }: { close: () => void }) {
   const win = useGame((s) => s.lastWin);
   return (
     <Modal>
-      <img className="fs-banner gift-cat" src="/symbols/black_cat.png" alt="" />
+      <img className="fs-banner gift-cat" src={asset("symbols/black_cat.png")} alt="" />
       <h2>Чёрный кот откопал сундук!</h2>
       <p className="muted">
         Подарок новичку: целое поле чёрных котов. Такое поле выпадает крайне редко —

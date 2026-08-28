@@ -5,6 +5,7 @@ import {
   SPIN_BASE_MS, REEL_STAGGER_MS, ANTICIPATION_MS,
   type SymbolId, type Cell,
 } from '../game/core';
+import { asset } from '../assets';
 
 /**
  * Барабан прокручивается по-настоящему: лента из случайных символов
@@ -28,7 +29,7 @@ function fillerStrip(seed: number): SymbolId[] {
 function SymbolArt({ id, multiplier }: { id: SymbolId; multiplier: number }) {
   return (
     <div className="cell-art">
-      <img src={SYMBOLS[id].art} alt="" draggable={false} />
+      <img src={asset(SYMBOLS[id].art)} alt="" draggable={false} />
       {id === 'wild' && multiplier > 1 && <span className="mult">×{multiplier}</span>}
     </div>
   );

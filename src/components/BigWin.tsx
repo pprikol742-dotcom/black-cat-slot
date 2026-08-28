@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useGame } from '../store/gameStore';
 import CountUp from './CountUp';
+import { asset } from '../assets';
 
 const TITLES: Record<string, string> = {
   big: 'Крупный выигрыш!',
@@ -34,7 +35,7 @@ export default function BigWin() {
         {Array.from({ length: coinCount }, (_, i) => (
           <img
             key={i}
-            src="/symbols/coin.png"
+            src={asset("symbols/coin.png")}
             alt=""
             draggable={false}
             style={{
@@ -55,7 +56,7 @@ export default function BigWin() {
       <h2>{TITLES[tier]}</h2>
 
       <div className="bigwin-row">
-        <img className="bigwin-coin" src="/symbols/coin.png" alt="" draggable={false} />
+        <img className="bigwin-coin" src={asset("symbols/coin.png")} alt="" draggable={false} />
         <CountUp className="bigwin-amount" value={amount} />
       </div>
     </div>

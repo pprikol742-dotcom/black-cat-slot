@@ -6,6 +6,8 @@
  * Вектор выглядит одинаково везде и красится под тему через currentColor.
  */
 
+import { asset } from '../assets';
+
 interface Props {
   size?: number;
   className?: string;
@@ -97,7 +99,7 @@ export function PawIcon({ size = 26, className }: Props) {
 export function Coin({ size = 22, className }: Props) {
   return (
     <img
-      src="/symbols/coin.png"
+      src={asset("symbols/coin.png")}
       alt=""
       width={size}
       height={size}
