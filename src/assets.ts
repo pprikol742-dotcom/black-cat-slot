@@ -11,3 +11,14 @@ const BASE = import.meta.env.BASE_URL || './';
 export function asset(path: string): string {
   return BASE.replace(/\/?$/, '/') + path.replace(/^\//, '');
 }
+
+/**
+ * Абсолютный адрес файла.
+ *
+ * Нужен там, где путь попадает в CSS: относительную ссылку внутри
+ * custom property браузер считает от файла стилей в /assets/, а не от
+ * страницы, и фон не находится. Абсолютный адрес снимает неоднозначность.
+ */
+export function assetUrl(path: string): string {
+  return new URL(asset(path), document.baseURI).href;
+}

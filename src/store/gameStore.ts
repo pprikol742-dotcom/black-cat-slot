@@ -170,8 +170,9 @@ export const useGame = create<GameState>((set, get) => ({
 
   setScreen(screen) {
     set({ screen });
-    // Награду за вход показываем один раз, сразу после входа в игру
-    if (screen === 'game' && get().canClaimDaily()) {
+    // Награду за вход показываем после входа в игру, но не поверх обучения:
+    // два окна разом читаются как сбой. Новичок увидит её, когда доучится.
+    if (screen === 'game' && get().tutorialDone && get().canClaimDaily()) {
       setTimeout(() => set({ modal: 'daily' }), 400);
     }
   },
@@ -211,6 +212,10 @@ export const useGame = create<GameState>((set, get) => ({
   finishTutorial() {
     set({ tutorialDone: true, tutorialStep: 0 });
     persist(get());
+    // Теперь экран свободен — самое время показать награду за вход
+    if (get().canClaimDaily() && get().modal === null) {
+      setTimeout(() => set({ modal: 'daily' }), 350);
+    }
   },
 
   canClaimDaily() {

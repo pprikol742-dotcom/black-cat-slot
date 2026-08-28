@@ -8,7 +8,7 @@ import Modals from './components/Modals';
 import Tutorial from './components/Tutorial';
 import MainMenu from './components/MainMenu';
 import BigWin from './components/BigWin';
-import { asset } from './assets';
+import { assetUrl } from './assets';
 
 export default function App() {
   const ready = useGame((s) => s.ready);
@@ -23,8 +23,8 @@ export default function App() {
   // Фоны лежат в public, поэтому их адрес зависит от места публикации
   useEffect(() => {
     const root = document.documentElement.style;
-    root.setProperty('--bg-day', `url(${asset('bg.jpg')})`);
-    root.setProperty('--bg-night', `url(${asset('bg_night.jpg')})`);
+    root.setProperty('--bg-day', `url("${assetUrl('bg.jpg')}")`);
+    root.setProperty('--bg-night', `url("${assetUrl('bg_night.jpg')}")`);
   }, []);
 
   // Браузеры не дают запустить звук до первого касания экрана
