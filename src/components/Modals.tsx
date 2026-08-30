@@ -163,43 +163,52 @@ function FreeSpinsEnd({ close }: { close: () => void }) {
 }
 
 function Gift({ close }: { close: () => void }) {
-  const kind = useGame((s) => s.giftKind);
   const win = useGame((s) => s.lastWin);
   const freeLeft = useGame((s) => s.freeSpinsLeft);
   const freeTotal = useGame((s) => s.freeSpinsTotal);
 
-  const scatterGift = kind === 'scatterCats';
-
   const next = () => {
     sfx.click();
     useGame.setState({ giftKind: null });
-    // Подарок с самоцветами продолжается серией бесплатных спинов
+    // Подарок продолжается серией бесплатных спинов
     if (freeLeft > 0) useGame.setState({ modal: 'freeSpinsIntro' });
     else close();
   };
 
   return (
     <Modal>
-      <img
-        className="fs-banner gift-cat"
-        src={asset(scatterGift ? 'symbols/white_cat.png' : 'symbols/black_cat.png')}
-        alt=""
-      />
-      <h2>
-        {scatterGift ? 'Белая кошечка созвала самоцветы!' : 'Чёрный кот откопал сундук!'}
-      </h2>
+      <img className="fs-banner gift-cat" src={asset('symbols/white_cat.png')} alt="" />
+      <h2>Белая кошечка созвала самоцветы!</h2>
       <p className="muted">
-        {scatterGift
-          ? `Ещё один подарок новичку: целая линия кошечек и самоцветы сверху и снизу. Это сразу и выплата, и ${freeTotal} бесплатных спинов.`
-          : 'Подарок новичку: целое поле чёрных котов. Такое поле выпадает крайне редко.'}
+        Подарок новичку: целая линия кошечек и самоцветы сверху и снизу.
+        Это сразу и выплата, и {freeTotal} бесплатных спинов.
       </p>
       <p className="muted small">
-        Подарки на этом заканчиваются — дальше барабаны крутятся честно, без поблажек.
+        Подарок один — дальше барабаны крутятся честно, без поблажек.
       </p>
       <div className="big-win">+{win.toLocaleString('ru-RU')} <Coin size={26} /></div>
       <button className="btn" onClick={next}>
         {freeLeft > 0 ? 'К бесплатным спинам' : 'Забрать'}
       </button>
+    </Modal>
+  );
+}
+
+function Reset({ close }: { close: () => void }) {
+  const reset = useGame((s) => s.resetProgress);
+  const balance = useGame((s) => s.balance);
+  const spins = useGame((s) => s.spinCount);
+
+  return (
+    <Modal onClose={close}>
+      <h2>Начать заново?</h2>
+      <p className="muted">
+        Баланс {balance.toLocaleString('ru-RU')} и {spins.toLocaleString('ru-RU')} сыгранных спинов
+        будут стёрты. Серия ежедневных наград и подарки новичку тоже сбросятся.
+      </p>
+      <p className="muted small">Отменить это действие нельзя.</p>
+      <button className="btn ghost" onClick={() => { sfx.click(); close(); }}>Оставить как есть</button>
+      <button className="btn danger" onClick={() => { void reset(); }}>Стереть и начать заново</button>
     </Modal>
   );
 }
@@ -216,6 +225,7 @@ export default function Modals() {
     case 'freeSpinsIntro': return <FreeSpinsIntro />;
     case 'freeSpinsEnd': return <FreeSpinsEnd close={close} />;
     case 'gift': return <Gift close={close} />;
+    case 'reset': return <Reset close={close} />;
     default: return null;
   }
 }

@@ -426,18 +426,17 @@ export function purchasedFreeSpins(): number {
 // ПОДАРКИ НОВИЧКУ
 // ─────────────────────────────────────────────────────────────
 
-export type GiftKind = 'blackCats' | 'scatterCats';
+export type GiftKind = 'scatterCats';
 
 /**
- * Заранее заданные поля, которые новичок получает один раз каждое.
+ * Заранее заданное поле, которое новичок получает один раз.
  * Это не случайность, и игра говорит об этом прямым текстом: иначе у
  * игрока сложится ложное представление о щедрости математики.
- * После последнего подарка барабаны честны навсегда.
+ * После подарка барабаны честны навсегда.
  *
  * Считаются только обычные спины, бесплатные в счёт не идут.
  */
 export const GIFT_SCHEDULE: readonly { spin: number; kind: GiftKind }[] = [
-  { spin: 37, kind: 'blackCats' },
   { spin: 44, kind: 'scatterCats' },
 ] as const;
 
@@ -449,17 +448,12 @@ function cell(symbol: SymbolId, multiplier = 1): Cell {
   return { symbol, multiplier, sticky: false };
 }
 
-/** Поле подарка. */
-export function giftGrid(kind: GiftKind): Grid {
-  if (kind === 'blackCats') {
-    // Одни чёрные коты: все 20 линий по пять символов
-    return Array.from({ length: REEL_COUNT }, () =>
-      Array.from({ length: ROW_COUNT }, () => cell('black_cat')),
-    );
-  }
-
-  // Белые кошечки во всю среднюю линию, самоцветы сверху и снизу.
-  // Скаттеров десять — это сразу и выплата, и максимальные фриспины.
+/**
+ * Поле подарка: белые кошечки во всю среднюю линию, самоцветы сверху
+ * и снизу. Скаттеров десять — это сразу и выплата, и максимальные
+ * бесплатные спины.
+ */
+export function giftGrid(_kind: GiftKind): Grid {
   return Array.from({ length: REEL_COUNT }, () => [
     cell('scatter'),
     cell('white_cat'),

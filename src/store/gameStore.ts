@@ -49,10 +49,12 @@ interface SavedState {
 
 export type Screen = 'menu' | 'game';
 export type ModalId =
-  | null | 'rules' | 'daily' | 'coins' | 'buyBonus' | 'freeSpinsIntro' | 'freeSpinsEnd' | 'gift';
+  | null | 'rules' | 'daily' | 'coins' | 'buyBonus' | 'freeSpinsIntro' | 'freeSpinsEnd' | 'gift' | 'reset';
 
 interface GameState extends SavedState {
   ready: boolean;
+  /** Загрузка прошла без сбоев — только тогда можно перезаписывать сохранение. */
+  loadOk: boolean;
   screen: Screen;
   modal: ModalId;
 
@@ -96,12 +98,17 @@ interface GameState extends SavedState {
   watchAdForCoins(): Promise<void>;
   maybeTopUp(): void;
   canClaimDaily(): boolean;
+  /** Есть ли что продолжать: игрок уже крутил барабаны. */
+  hasProgress(): boolean;
+  saveNow(): void;
+  resetProgress(): Promise<void>;
 }
 
 const dayNumber = () => Math.floor(Date.now() / 86_400_000);
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 function persist(s: GameState) {
+  if (!s.loadOk) return;
   const data: SavedState = {
     balance: s.balance,
     betIndex: s.betIndex,
@@ -118,6 +125,7 @@ function persist(s: GameState) {
 
 export const useGame = create<GameState>((set, get) => ({
   ready: false,
+  loadOk: false,
   screen: 'menu',
   modal: null,
 
@@ -153,7 +161,15 @@ export const useGame = create<GameState>((set, get) => ({
   bonusCost: () => bonusPrice(BET_STEPS[get().betIndex]),
 
   async boot() {
-    const saved = await platform.load<SavedState | null>('state', null);
+    let saved: SavedState | null = null;
+    let ok = true;
+    try {
+      saved = await platform.load<SavedState | null>('state', null);
+    } catch {
+      // Хранилище не ответило. Играть можно, но записывать поверх нельзя:
+      // иначе поверх настоящего прогресса ляжет пустая заготовка.
+      ok = false;
+    }
     if (saved) {
       set({
         balance: saved.balance ?? START_BALANCE,
@@ -164,12 +180,15 @@ export const useGame = create<GameState>((set, get) => ({
         soundOn: saved.soundOn ?? true,
         lastTopUp: saved.lastTopUp ?? 0,
         spinCount: saved.spinCount ?? 0,
-        // У старых сохранений был один флаг вместо списка
-        giftsDone: saved.giftsDone
-          ?? ((saved as { giftDone?: boolean }).giftDone ? ['blackCats' as GiftKind] : []),
+        // В старых сохранениях был ещё подарок с чёрными котами — его
+        // больше нет, поэтому оставляем только известные виды
+        giftsDone: (saved.giftsDone ?? []).filter(
+          (g): g is GiftKind => g === 'scatterCats',
+        ),
       });
     }
-    set({ ready: true });
+    set({ ready: true, loadOk: ok });
+    if (!ok) console.warn('Прогресс не загрузился — запись отключена, чтобы не затереть сохранение');
   },
 
   setScreen(screen) {
@@ -224,6 +243,45 @@ export const useGame = create<GameState>((set, get) => ({
 
   canClaimDaily() {
     return get().lastDailyDay !== dayNumber();
+  },
+
+  hasProgress() {
+    return get().spinCount > 0;
+  },
+
+  /** Принудительное сохранение — например, когда игру сворачивают. */
+  saveNow() {
+    const s = get();
+    if (s.ready && s.loadOk) persist(s);
+  },
+
+  async resetProgress() {
+    sfx.click();
+    stickyRef.current = null;
+    set({
+      balance: START_BALANCE,
+      betIndex: 1,
+      dailyStreak: 0,
+      lastDailyDay: 0,
+      tutorialDone: false,
+      lastTopUp: 0,
+      spinCount: 0,
+      giftsDone: [],
+      grid: spinGrid(BASE_REELS),
+      lineWins: [],
+      lastWin: 0,
+      tier: 'none',
+      highlight: -1,
+      freeSpinsLeft: 0,
+      freeSpinsTotal: 0,
+      freeSpinsWin: 0,
+      inFreeSpins: false,
+      autoPlay: false,
+      tutorialStep: 0,
+      modal: null,
+      screen: 'menu',
+    });
+    persist(get());
   },
 
   async claimDaily() {
